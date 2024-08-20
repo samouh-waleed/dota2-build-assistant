@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Depends
 from app.models.user import User
-from app.schema import UserCreate, UserUpdate
-from app.database_connection import get_db
+from app.models.schema import UserCreate, UserUpdate
+from app.database.connection import get_db
 
 # Function to get a single user by ID
 def get_user(user_id: str, db: Session = Depends(get_db)):

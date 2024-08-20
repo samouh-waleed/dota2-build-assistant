@@ -1,3 +1,7 @@
+# Ignore the data directory
+dota2-build-assistant/Backend/data/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

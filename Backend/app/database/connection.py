@@ -9,7 +9,7 @@ load_dotenv()
 
 # Fetch database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL: # If the URL is not found, raise an error
+if not DATABASE_URL:
     raise ValueError("No DATABASE_URL environment variable found")
 
 # Create the engine, which is the core interface to the database
