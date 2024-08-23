@@ -58,34 +58,45 @@ def save_data_to_file(data, file_path):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
     with open(file_path, 'a') as f:
         json.dump(data, f)
-        f.write("\n")
+        f.write(",\n")  # Separate each JSON object with a comma for proper formatting
 
 # Main function to gather match data
 def gather_ranked_match_data():
     total_data_size = 0
     data_file = os.path.join(os.path.dirname(__file__), '../data/raw/raw_data.json')
 
-    while total_data_size < 5 * (1024**3):  # Target size is 5 GB
-        public_matches = fetch_random_ranked_matches()
-        
-        if not public_matches:
-            time.sleep(10)  # wait before retrying
-            continue
-        
-        for match in public_matches:
-            if match.get('avg_rank_tier'):  # Only consider ranked matches
-                match_data = fetch_match_data(match['match_id'])
-                if match_data:
-                    extracted_data = extract_match_data(match_data)
-                    save_data_to_file(extracted_data, data_file)
-                    
-                    # Update total data size
-                    total_data_size += len(json.dumps(extracted_data).encode('utf-8'))
+    # Ensure the JSON file starts with an opening bracket to make it an array
+    with open(data_file, 'w') as f:
+        f.write("[\n")
 
-                time.sleep(1)  # Avoid hitting API rate limits
-        
-        print(f"Total data size: {total_data_size / (1024**3):.2f} GB")
-        time.sleep(1)  # To avoid hitting API rate limits
+    try:
+        while total_data_size < 5 * (1024**3):  # Target size is 5 GB
+            public_matches = fetch_random_ranked_matches()
+            
+            if not public_matches:
+                time.sleep(10)  # wait before retrying
+                continue
+            
+            for match in public_matches:
+                if match.get('avg_rank_tier'):  # Only consider ranked matches
+                    match_data = fetch_match_data(match['match_id'])
+                    if match_data:
+                        extracted_data = extract_match_data(match_data)
+                        save_data_to_file(extracted_data, data_file)
+                        
+                        # Update total data size
+                        total_data_size += len(json.dumps(extracted_data).encode('utf-8'))
+
+                    time.sleep(1)  # Avoid hitting API rate limits
+            
+            print(f"Total data size: {total_data_size / (1024**3):.2f} GB")
+            time.sleep(1)  # To avoid hitting API rate limits
+    finally:
+        # Ensure the JSON file ends with a closing bracket to close the array
+        with open(data_file, 'a') as f:
+            f.seek(f.tell() - 2, os.SEEK_SET)  # Move the cursor back to overwrite the last comma
+            f.write("\n]")
+
     print("Data collection complete!")
 
 # Example usage
